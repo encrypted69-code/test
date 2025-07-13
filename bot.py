@@ -21,7 +21,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     with open(filename, 'rb') as photo:
         await update.message.reply_photo(photo=photo, caption="Here is your QR code!")
 
-app = ApplicationBuilder().token('YOUR_BOT_TOKEN').build()
+app = ApplicationBuilder().token('8161625128:AAH-s6KpjGEWWwMxaZofy2eik2nJtx4yNCw').build()
 app.add_handler(CommandHandler('start', start))
 app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
 app.run_polling()
