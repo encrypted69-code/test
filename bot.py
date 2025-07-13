@@ -1,27 +1,22 @@
 from telegram import Update
-from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, filters, ContextTypes
-import qrcode
-from io import BytesIO
-import os
-from datetime import datetime
+from telegram.ext import ApplicationBuilder, CommandHandler, ContextTypes
+import requests
+
+# URL to the raw image file in your GitHub repo
+QR_IMAGE_URL = "https://raw.githubusercontent.com/encrypted69-code/test/main/qr/qr1.png.jpg"
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await update.message.reply_text('Send me any text and I will send you a QR code!')
+    await update.message.reply_text('Send /qr to receive the QR code image.')
 
-async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    text = update.message.text
-    # Generate QR code
-    qr = qrcode.make(text)
-    # Save to images/ with a unique name
-    timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
-    filename = f'images/qr_{timestamp}.png'
-    os.makedirs('images', exist_ok=True)
-    qr.save(filename, 'PNG')
-    # Also send as photo
-    with open(filename, 'rb') as photo:
-        await update.message.reply_photo(photo=photo, caption="Here is your QR code!")
+async def send_qr(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    # Download the image from GitHub
+    response = requests.get(QR_IMAGE_URL)
+    if response.status_code == 200:
+        await update.message.reply_photo(photo=response.content, caption="Here is your QR code from GitHub!")
+    else:
+        await update.message.reply_text("Sorry, could not retrieve the QR code image.")
 
 app = ApplicationBuilder().token('8161625128:AAH-s6KpjGEWWwMxaZofy2eik2nJtx4yNCw').build()
 app.add_handler(CommandHandler('start', start))
-app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
+app.add_handler(CommandHandler('qr', send_qr))
 app.run_polling()
